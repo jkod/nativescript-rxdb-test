@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@nativescript-offline-first/nativescript-pouchdb-sqlite-adapter": [
+        "libs/nativescript-pouchdb-sqlite-adapter/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

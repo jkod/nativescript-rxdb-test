@@ -1,6 +1,93 @@
 {
   "version": 2,
-  "projects": {},
+  "projects": {
+    "nativescript-pouchdb-sqlite-adapter": {
+      "root": "libs\\nativescript-pouchdb-sqlite-adapter"
+    },
+    "nativescript-rxdb": {
+      "projectType": "application",
+      "root": "apps/nativescript-rxdb/",
+      "sourceRoot": "apps/nativescript-rxdb/src",
+      "prefix": "",
+      "targets": {
+        "build": {
+          "executor": "@nativescript/nx:build",
+          "options": {
+            "noHmr": true,
+            "production": true,
+            "uglify": true,
+            "release": true,
+            "forDevice": true
+          },
+          "configurations": {
+            "prod": {
+              "fileReplacements": [
+                {
+                  "replace": "./src/environments/environment.ts",
+                  "with": "./src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "ios": {
+          "executor": "@nativescript/nx:build",
+          "options": {
+            "platform": "ios"
+          },
+          "configurations": {
+            "build": {
+              "copyTo": "./dist/build.ipa"
+            },
+            "prod": {
+              "combineWithConfig": "build:prod"
+            }
+          }
+        },
+        "android": {
+          "executor": "@nativescript/nx:build",
+          "options": {
+            "platform": "android"
+          },
+          "configurations": {
+            "build": {
+              "copyTo": "./dist/build.apk"
+            },
+            "prod": {
+              "combineWithConfig": "build:prod"
+            }
+          }
+        },
+        "clean": {
+          "executor": "@nativescript/nx:build",
+          "options": {
+            "clean": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "apps/nativescript-rxdb/**/*.ts",
+              "apps/nativescript-rxdb/src/**/*.html"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "apps/nativescript-rxdb/jest.config.js",
+            "tsConfig": "apps/nativescript-rxdb/tsconfig.spec.json",
+            "passWithNoTests": true,
+            "setupFile": "apps/nativescript-rxdb/src/test-setup.ts"
+          }
+        }
+      }
+    },
+    "pouch-adapter-websql-core": {
+      "root": "libs\\pouch-adapter-websql-core"
+    }
+  },
   "cli": {
     "defaultCollection": "@nrwl/workspace"
   }

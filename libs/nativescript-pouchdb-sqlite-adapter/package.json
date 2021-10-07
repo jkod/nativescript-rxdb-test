@@ -1,0 +1,6 @@
+{
+  "name": "@nativescript-offline-first\\nativescript-pouchdb-sqlite-adapter",
+  "scripts": {
+    "test": "node index.js"
+  }
+}
