@@ -28,7 +28,10 @@ function createOpenDBFunction(opts) {
 
     const db = openOrCreate(path.join(knownFolders.documents().getFolder('db').path, `${openOpts.name}.sqlite`));
 
-    // db.execute('CREATE TABLE names (id INT, name TEXT, PRIMARY KEY (id))');
+    // db.execute('CREATE TABLE names (id INT, name TEXT, PRIMARY KEY (id))').then((res)=> {
+    //   console.log('res:', res);
+    // })
+    // console.log('response', res);
     // const db = sqlite(openOpts.name);
     console.log( 'db is : ', db.isOpen );
     // const db = await new sqlite.SQLite(openOpts.name);

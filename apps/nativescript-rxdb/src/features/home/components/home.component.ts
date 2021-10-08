@@ -20,7 +20,7 @@ export class HomeComponent implements OnInit {
   }
 
   constructor(private databaseService: DatabaseService ) {
-    // const db = openOrCreate('/data/user/0/org.nativescript.rxdb/files/db/ns-sqlite-rxdb-0-.sqlite');
+    // const db = openOrCreate('/data/user/0/org.nativescript.rxdb/files/db/ns-sqlite-rxdb-0-hero-local.sqlite');
     // db.select(`
     //   SELECT
     //     name
@@ -70,40 +70,40 @@ export class HomeComponent implements OnInit {
   }
 
   async tryQuery() {
-    const result = await this.databaseService.db.collections.hero.findOne();
-    console.log(result);
+    const result = await this.databaseService.db.collections.hero.find();
+    console.log(JSON.stringify(result));
 
     this.databaseService.db.collections.hero.$.subscribe((hero) => {
       console.log('hero', hero);
     })
-    // const db = openOrCreate('/data/user/0/org.nativescript.rxdb/files/db/ns-sqlite-rxdb-0-.sqlite');
-    // db.select(`
-    //   SELECT
-    //     name
-    //   FROM
-    //     sqlite_master
-    //   WHERE
-    //     type ='table' AND
-    //     name NOT LIKE 'sqlite_%';`
-    // ).then((res) => {
-    //   console.log(res);
-    // });
+    const db = openOrCreate('/data/user/0/org.nativescript.rxdb/files/db/ns-sqlite-rxdb-0-hero-local.sqlite');
+    db.select(`
+      SELECT
+        name
+      FROM
+        sqlite_master
+      WHERE
+        type ='table' AND
+        name NOT LIKE 'sqlite_%';`
+    ).then((res) => {
+      console.log(res);
+    });
 
-    // db.select('SELECT * FROM \"local-store\";').then((res)=> {
-    //   console.log(res);
-    // })
+    db.select('SELECT * FROM \"local-store\";').then((res)=> {
+      console.log(res);
+    })
 
-    // db.select('SELECT * FROM \"document-store\";').then((res)=> {
-    //   console.log(res);
-    // })
+    db.select('SELECT * FROM \"document-store\";').then((res)=> {
+      console.log(res);
+    })
 
-    // db.select('SELECT * FROM \"attach-store\";').then((res)=> {
-    //   console.log(res);
-    // })
+    db.select('SELECT * FROM \"attach-store\";').then((res)=> {
+      console.log(res);
+    })
 
-    // db.select('SELECT * FROM \"metadata-store\";').then((res)=> {
-    //   console.log(res);
-    // })
+    db.select('SELECT * FROM \"metadata-store\";').then((res)=> {
+      console.log(res);
+    })
 
   }
 }
