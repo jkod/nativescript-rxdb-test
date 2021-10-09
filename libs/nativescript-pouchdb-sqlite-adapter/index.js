@@ -1,6 +1,6 @@
 'use strict'
 
-var WebSqlPouchCore = require('../pouchdb-adapter-websql-core').default
+var WebSqlPouchCore = require('../nativescript-pouchdb-adapter-websql-core').default
 import { openOrCreate, SQLiteDatabase } from '@akylas/nativescript-sqlite';
 import { knownFolders, path } from '@nativescript/core';
 

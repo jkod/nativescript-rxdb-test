@@ -21,5 +21,20 @@
         "statusBarItem.remoteBackground": "#000000",
         "statusBarItem.remoteForeground": "#e7e7e7"
     },
-    "peacock.color": "#000000"
+    "peacock.color": "#000000",
+    "NativescriptExtend.fileAssociations": [
+        {
+            "systemId": "c:\\Users\\Dylan\\Documents\\code\\nativescript-rxdb-test\\schema\\tns.xsd",
+            "pattern": "**/**/*.xml"
+        },
+        {
+            "systemId": "http://www.w3.org/2001/XMLSchema.xsd",
+            "pattern": "c:\\Users\\Dylan\\Documents\\code\\nativescript-rxdb-test\\schema\\tns.xsd"
+        }
+    ],
+    "files.exclude": {
+        "schema": true
+    },
+    "NativescriptExtend.format.enabled": true,
+    "NativescriptExtend.validation.enabled": true
 }
