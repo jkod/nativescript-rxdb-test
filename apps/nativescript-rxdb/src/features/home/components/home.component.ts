@@ -70,10 +70,10 @@ export class HomeComponent implements OnInit {
   }
 
   async tryQuery() {
-    const result = await this.databaseService.db.collections.hero.find();
+    const result = await this.databaseService.db.collections.hero.find().exec();
     console.log(JSON.stringify(result));
 
-    this.databaseService.db.collections.hero.$.subscribe((hero) => {
+    this.databaseService.db.collections.hero.find().$.subscribe((hero) => {
       console.log('hero', hero);
     })
     const db = openOrCreate('/data/user/0/org.nativescript.rxdb/files/db/ns-sqlite-rxdb-0-hero-local.sqlite');
@@ -89,19 +89,19 @@ export class HomeComponent implements OnInit {
       console.log(res);
     });
 
-    db.select('SELECT * FROM \"local-store\";').then((res)=> {
+    db.select('SELECT * FROM "local-store";').then((res)=> {
       console.log(res);
     })
 
-    db.select('SELECT * FROM \"document-store\";').then((res)=> {
+    db.select('SELECT * FROM "document-store";').then((res)=> {
       console.log(res);
     })
 
-    db.select('SELECT * FROM \"attach-store\";').then((res)=> {
+    db.select('SELECT * FROM "attach-store";').then((res)=> {
       console.log(res);
     })
 
-    db.select('SELECT * FROM \"metadata-store\";').then((res)=> {
+    db.select('SELECT * FROM "metadata-store";').then((res)=> {
       console.log(res);
     })
 

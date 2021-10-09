@@ -2,7 +2,7 @@
   "name": "rxdb-test",
   "main": "./src/main.ts",
   "license": "SEE LICENSE IN <your-license-filename>",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "postinstall": "node ./tools/postinstall.js"
   },

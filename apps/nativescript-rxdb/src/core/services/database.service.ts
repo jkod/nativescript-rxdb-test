@@ -180,6 +180,7 @@ async function _create(): Promise<RxHeroesDatabase> {
   console.log('DatabaseService: created database');
 
   // create collections
+  // return db;
   console.log('DatabaseService: create collections');
   const heroCollection = await db.addCollections({
     hero: {
