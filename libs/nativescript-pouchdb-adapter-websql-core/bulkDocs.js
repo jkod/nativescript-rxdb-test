@@ -318,6 +318,7 @@ function websqlBulkDocs(dbOpts, req, opts, api, db, websqlChanges, callback) {
         console.log('[bulkDocs]', result);
         if (result.length) {
           var metadata = safeJsonParse(result[0].json);
+          console.log('[bulkdocs]metadata', metadata);
           fetchedDocs.set(id, metadata);
         }
         checkDone();
@@ -362,7 +363,9 @@ function websqlBulkDocs(dbOpts, req, opts, api, db, websqlChanges, callback) {
           fetchExistingDocs(websqlProcessDocs);
         }
       });
-    }).catch(websqlError(callback)).then(complete);
+    })
+    .catch(websqlError(callback))
+    .then(complete);
   });
 }
 

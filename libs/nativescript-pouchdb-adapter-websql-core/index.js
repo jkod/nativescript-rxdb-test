@@ -62,6 +62,7 @@ var websqlChanges = new Changes();
 
 
 function fetchAttachmentsIfNecessary(doc, opts, api, txn, cb) {
+  console.log('[pdb-index]', 'fetchAttachmentsIfNecessary');
   var attachments = Object.keys(doc._attachments || {});
   if (!attachments.length) {
     return cb && cb();
@@ -192,6 +193,7 @@ function WebSqlPouch(opts, callback) {
       window.localStorage['_pouch__websqldb_' + api._name] = true;
       console.log('[pdb-index]_name', api._name);
     }
+    console.log('callback', callback, api);
     callback(null, api);
   }
 
@@ -222,8 +224,8 @@ function WebSqlPouch(opts, callback) {
           var deleted = [];
           var local = [];
 
-          for (var i = 0; i < result.rows.length; i++) {
-            var item = result.rows.item(i);
+          for (var i = 0; i < result.length; i++) {
+            var item = result[i];
             var seq = item.seq;
             var metadata = JSON.parse(item.metadata);
             if (isDeleted(metadata)) {
@@ -257,8 +259,8 @@ function WebSqlPouch(opts, callback) {
         DOC_STORE + '.winningseq WHERE local = 1';
       dbExecuteSql(sql, [], function (tx, res) {
         var rows = [];
-        for (var i = 0; i < res.rows.length; i++) {
-          rows.push(res.rows.item(i));
+        for (var i = 0; i < res.length; i++) {
+          rows.push(res[i]);
         }
         function doNext() {
           console.log("[pdb-index]", "doNext" );
@@ -317,8 +319,8 @@ function WebSqlPouch(opts, callback) {
           var sql = 'SELECT hex(doc_id_rev) as hex FROM ' + BY_SEQ_STORE;
           dbExecuteSql(sql, [], function (tx, res) {
             var rows = [];
-            for (var i = 0; i < res.rows.length; i++) {
-              rows.push(res.rows.item(i));
+            for (var i = 0; i < res.length; i++) {
+              rows.push(res[i]);
             }
             updateRows(rows);
           });
@@ -358,7 +360,7 @@ function WebSqlPouch(opts, callback) {
           sql += ' LIMIT ' + pageSize + ' OFFSET ' + offset;
           offset += pageSize;
           dbExecuteSql(sql, [], function (tx, res) {
-            if (!res.rows.length) {
+            if (!res.length) {
               return callback(tx);
             }
             var digestSeqs = {};
@@ -370,8 +372,8 @@ function WebSqlPouch(opts, callback) {
                 seqs.push(seq);
               }
             }
-            for (var i = 0; i < res.rows.length; i++) {
-              var row = res.rows.item(i);
+            for (var i = 0; i < res.length; i++) {
+              var row = res[i];
               var doc = unstringifyDoc(row.data, row.id, row.rev);
               var atts = Object.keys(doc._attachments || {});
               for (var j = 0; j < atts.length; j++) {
@@ -526,6 +528,7 @@ function WebSqlPouch(opts, callback) {
         var sql = 'SELECT dbid FROM ' + META_STORE;
         dbExecuteSql(sql, [], function (tx, result) {
           instanceId = result[0].dbid;
+          console.log('instance ID ', instanceId);
           onGetInstanceId();
         });
       };
@@ -545,6 +548,7 @@ function WebSqlPouch(opts, callback) {
       // run each migration sequentially
       var i = dbVersion;
       var nextMigration = function (tx) {
+        console.log('migration', i)
         tasks[i - 1](tx, nextMigration);
         i++;
       };
@@ -562,7 +566,13 @@ function WebSqlPouch(opts, callback) {
       });
 
       console.log('transaction')
-    }).then(dbCreated).catch(websqlError(callback));
+    })
+    .catch(websqlError(callback))
+    .then(() => {
+      console.log('creating db')
+      dbCreated();
+      console.log('db created')
+    });
   }
 
   function fetchVersion(tx) {
@@ -637,8 +647,8 @@ function WebSqlPouch(opts, callback) {
     console.log('[pdb-index]_info');
     var seq;
     var docCount;
-    try {
-      await db.readTransaction( () => {
+    // try {
+      db.readTransaction( () => {
         getMaxSeq(db, function (theSeq) {
           seq = theSeq;
         });
@@ -646,16 +656,20 @@ function WebSqlPouch(opts, callback) {
           console.log('the doc count', theDocCount);
           docCount = theDocCount;
         });
+      })
+      .catch(
+        websqlError(callback)
+      ).then(() => {
+        callback(null, {
+          doc_count: docCount,
+          update_seq: seq,
+          websql_encoding: encoding
+        });
       });
-      console.log(docCount);
-    } catch (error) {
-      websqlError(callback)
-    }
-    callback(null, {
-      doc_count: docCount,
-      update_seq: seq,
-      websql_encoding: encoding
-    });
+      // console.log(docCount);
+
+    // catch (error) {
+    // }
   };
 
   api._bulkDocs = function (req, reqOpts, callback) {
@@ -673,7 +687,7 @@ function WebSqlPouch(opts, callback) {
     var sqlArgs = [id];
 
     dbExecuteSql(sql, sqlArgs, function (a, results) {
-      if (!results.rows.length) {
+      if (!results.length) {
         var err = createError(MISSING_DOC, 'missing');
         return finish(err);
       }
@@ -728,7 +742,7 @@ function WebSqlPouch(opts, callback) {
     }
 
     dbExecuteSql(sql, sqlArgs, function (a, results) {
-      if (!results.rows.length) {
+      if (!results.length) {
         var missingErr = createError(MISSING_DOC, 'missing');
         return finish(missingErr);
       }
@@ -808,7 +822,9 @@ function WebSqlPouch(opts, callback) {
       // count the docs in parallel to other operations
       countDocs(db, function (docCount) {
         totalRows = docCount;
+        console.log('totalRows', totalRows);
       });
+
 
       /* istanbul ignore if */
       if (opts.update_seq) {
@@ -822,6 +838,7 @@ function WebSqlPouch(opts, callback) {
         return;
       }
 
+      console.log('keys', keys);
       if (keys) {
 
         var finishedCount = 0;
@@ -847,9 +864,10 @@ function WebSqlPouch(opts, callback) {
           );
           sql += ' LIMIT ' + limit + ' OFFSET ' + offset;
           dbExecuteSql(sql, sqlArgs, function (tx, result) {
+            console.log(result);
             finishedCount++;
-            for (var index = 0; index < result.rows.length; index++) {
-              allRows.push(result.rows.item(index));
+            for (var index = 0; index < result.length; index++) {
+              allRows.push(result[index]);
             }
             if (finishedCount === keyChunks.length) {
               processResult(allRows);
@@ -872,10 +890,12 @@ function WebSqlPouch(opts, callback) {
         );
         sql += ' LIMIT ' + limit + ' OFFSET ' + offset;
         dbExecuteSql(sql, sqlArgs, function (tx, result) {
-          var rows = [];
-          for (var index = 0; index < result.rows.length; index++) {
-            rows.push(result.rows.item(index));
-          }
+          console.log('890', result);
+          var rows = result;
+          // var rows = [];
+          // for (var index = 0; index < result.length; index++) {
+          //   rows.push(result[index]);
+          // }
           processResult(rows);
         });
 
@@ -883,6 +903,7 @@ function WebSqlPouch(opts, callback) {
 
       function processResult(rows) {
         console.log("[pdb-index]", "processResult" );
+        console.log(rows);
 
         for (var i = 0, l = rows.length; i < l; i++) {
           var item = rows[i];
@@ -895,6 +916,7 @@ function WebSqlPouch(opts, callback) {
             key: id,
             value: {rev: winningRev}
           };
+          console.log('doc',doc);
           if (opts.include_docs) {
             doc.doc = data;
             doc.doc._rev = winningRev;
@@ -929,20 +951,21 @@ function WebSqlPouch(opts, callback) {
           keys.forEach(function (key, index) {
             if (!results[index]) {
               results[index] = {key: key, error: 'not_found'};
+              console.log(results[index]);
             }
           });
         }
 
       }
-
-
-    }).catch(websqlError(callback)).then(function () {
+    })
+    .catch(websqlError(callback))
+    .then(function () {
       var returnVal = {
         total_rows: totalRows,
         offset: opts.skip,
         rows: results
       };
-
+      console.log(returnVal);
       /* istanbul ignore if */
       if (opts.update_seq) {
         returnVal.update_seq = updateSeq;
@@ -1021,8 +1044,8 @@ function WebSqlPouch(opts, callback) {
               opts.onChange(change);
             };
           }
-          for (var i = 0, l = result.rows.length; i < l; i++) {
-            var item = result.rows.item(i);
+          for (var i = 0, l = result.length; i < l; i++) {
+            var item = result[i];
             var metadata = safeJsonParse(item.metadata);
             lastSeq = item.maxSeq;
 
@@ -1105,7 +1128,7 @@ function WebSqlPouch(opts, callback) {
     db.readTransaction(() => {
       var sql = 'SELECT json AS metadata FROM ' + DOC_STORE + ' WHERE id = ?';
       dbExecuteSql(sql, [docId], function (db, result) {
-        if (!result.rows.length) {
+        if (!result.length) {
           callback(createError(MISSING_DOC));
         } else {
           var data = safeJsonParse(result[0].metadata);
@@ -1191,6 +1214,7 @@ function WebSqlPouch(opts, callback) {
         values = [id, newRev, json];
       }
       dbExecuteSql(sql, values, function (tx, res) {
+        console.log('putlocal res', res);
         if (res) {
           ret = {ok: true, id: id, rev: newRev};
           console.log('[pdb-index]putLocal-Ret', ret);
@@ -1232,7 +1256,7 @@ function WebSqlPouch(opts, callback) {
       var sql = 'DELETE FROM ' + LOCAL_STORE + ' WHERE id=? AND rev=?';
       var params = [doc._id, doc._rev];
       dbExecuteSql(sql, params, function (tx, res) {
-        if (!res.rowsAffected) {
+        if (!res.length) {
           return callback(createError(MISSING_DOC));
         }
         ret = {ok: true, id: doc._id, rev: '0-0'};
